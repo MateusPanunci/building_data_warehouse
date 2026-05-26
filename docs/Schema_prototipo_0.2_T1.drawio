@@ -1,0 +1,115 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="lfdlEVmwtCL9Dx4-77pv">
+    <mxGraphModel dx="2228" dy="545" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="klz6qyqBAvosr3qLXxjF-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="FT_Socioeconomicos" vertex="1">
+          <mxGeometry height="60" width="120" x="110" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Dim_Country" vertex="1">
+          <mxGeometry height="60" width="120" x="190" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-5" edge="1" parent="1" source="klz6qyqBAvosr3qLXxjF-4" style="endArrow=none;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="klz6qyqBAvosr3qLXxjF-1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="170" y="230" as="sourcePoint" />
+            <mxPoint x="220" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Dim_Sea" vertex="1">
+          <mxGeometry height="60" width="120" x="-40" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Dim_Airport" vertex="1">
+          <mxGeometry height="60" width="120" x="190" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Dim_Organization" vertex="1">
+          <mxGeometry height="60" width="120" x="370" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Language" vertex="1">
+          <mxGeometry height="35" width="80" x="110" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Religions" vertex="1">
+          <mxGeometry height="30" width="100" x="310" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-12" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="klz6qyqBAvosr3qLXxjF-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="40" y="380" as="sourcePoint" />
+            <mxPoint x="90" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-13" edge="1" parent="1" source="klz6qyqBAvosr3qLXxjF-7" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="180" y="380" as="sourcePoint" />
+            <mxPoint x="250" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-14" edge="1" parent="1" source="klz6qyqBAvosr3qLXxjF-4" style="endArrow=none;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="klz6qyqBAvosr3qLXxjF-8" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="170" y="300" as="sourcePoint" />
+            <mxPoint x="220" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="klz6qyqBAvosr3qLXxjF-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="FT_Clima" vertex="1">
+          <mxGeometry height="60" width="120" x="320" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;div&gt;Todos os Atributos&lt;/div&gt;&lt;div&gt;do CSV hapiness&lt;/div&gt;" vertex="1">
+          <mxGeometry height="45" width="120" x="110" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Inflation" vertex="1">
+          <mxGeometry height="30" width="90" x="15" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Unemployment" vertex="1">
+          <mxGeometry height="30" width="100" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Etnic Groups" vertex="1">
+          <mxGeometry height="30" width="100" x="310" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Name" vertex="1">
+          <mxGeometry height="30" width="80" x="-30" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Countries" vertex="1">
+          <mxGeometry height="30" width="80" x="-30" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="infant_mortality" vertex="1">
+          <mxGeometry height="30" width="100" x="10" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Name" vertex="1">
+          <mxGeometry height="30" width="80" x="210" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Name" vertex="1">
+          <mxGeometry height="30" width="80" x="390" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Countries" vertex="1">
+          <mxGeometry height="30" width="80" x="390" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-15" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="fk_country" vertex="1">
+          <mxGeometry height="30" width="80" x="205" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-17" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Population" vertex="1">
+          <mxGeometry height="35" width="90" x="10" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-18" edge="1" parent="1" source="klz6qyqBAvosr3qLXxjF-15" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="370" y="250" as="sourcePoint" />
+            <mxPoint x="250" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-19" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Air_quality_avg" vertex="1">
+          <mxGeometry height="35" width="90" x="290" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-20" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="year" vertex="1">
+          <mxGeometry height="35" width="90" x="400" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-21" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Precipitation_avg" vertex="1">
+          <mxGeometry height="50" width="100" x="285" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-23" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Fk_country" vertex="1">
+          <mxGeometry height="35" width="90" x="400" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="8uNWmwV0y-JB0mlVFv_x-24" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Fk_country" vertex="1">
+          <mxGeometry height="35" width="90" x="125" y="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

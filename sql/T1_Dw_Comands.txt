@@ -1,0 +1,830 @@
+-- Name: Mateus Panunci Gonçalves                           CDIA
+--       Alexandre da Silva Marchioli
+
+-- ===== Trabalho 1 - Data Integration and Preparation =====
+
+
+-- Staged Tables Creation
+
+-- The insertion of data is gone using python, i will send my git repository if you wanna see the insert commands too 
+
+CREATE TABLE STG_HAPPINESS (
+    rank_geral          NUMBER(3),
+    country_name        VARCHAR2(100),
+    region              VARCHAR2(100),
+    happiness_score     NUMBER(6,3),
+    standard_error      NUMBER(8,5),
+    gdp_per_capita      NUMBER(6,3),
+    social_support      NUMBER(6,3),
+    life_expectancy     NUMBER(6,3),
+    freedom             NUMBER(6,3),
+    generosity          NUMBER(6,3),
+    corruption_percept  NUMBER(6,3),
+    dystopia_residual   NUMBER(6,5)
+);
+
+
+CREATE TABLE STG_WORLD_BANK (
+    id           NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    source       VARCHAR2(100),         
+    json_data    CLOB,                  
+    load_date    DATE DEFAULT SYSDATE
+);
+
+
+CREATE TABLE STG_MONDIAL_XML (
+    id          NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    fonte       VARCHAR2(100),         -- 'mondial.xml'
+    dados_xml   XMLTYPE,               -- XML filtrado bruto
+    dt_carga    DATE DEFAULT SYSDATE
+);
+
+
+
+-- =============================================================
+-- Schema Creation 
+
+CREATE SEQUENCE DIM_COUNTRY_ID_COUNTRY_SEQ;
+
+CREATE TABLE dim_country (
+                id_country NUMBER NOT NULL,
+                nm_country VARCHAR2(120) NOT NULL,
+                region VARCHAR2(60),
+                CONSTRAINT DIM_COUNTRY_PK PRIMARY KEY (id_country)
+);
+COMMENT ON TABLE dim_country IS 'Save the Informations from Countries';
+COMMENT ON COLUMN dim_country.id_country IS 'Pk from the countries';
+
+
+CREATE TABLE dim_language (
+                id_country NUMBER NOT NULL,
+                nm_language VARCHAR2(60) NOT NULL,
+                CONSTRAINT DIM_LANGUAGE_PK PRIMARY KEY (id_country, nm_language)
+);
+COMMENT ON TABLE dim_language IS 'Save Language names';
+COMMENT ON COLUMN dim_language.id_country IS 'Pk from the countries';
+
+
+CREATE TABLE dim_religion (
+                id_country NUMBER NOT NULL,
+                nm_religion VARCHAR2(120) NOT NULL,
+                CONSTRAINT DIM_RELIGION_PK PRIMARY KEY (id_country, nm_religion)
+);
+COMMENT ON TABLE dim_religion IS 'Save the Religions names';
+COMMENT ON COLUMN dim_religion.id_country IS 'Pk from the countries';
+
+
+CREATE SEQUENCE DIM_ORGANIZATION_ID_ORGANIZ722;
+
+CREATE TABLE dim_organization (
+                id_organization NUMBER NOT NULL,
+                id_country NUMBER NOT NULL,
+                nm_organization VARCHAR2(120),
+                CONSTRAINT DIM_ORG_OK PRIMARY KEY (id_organization, id_country)
+);
+COMMENT ON TABLE dim_organization IS 'Save the Organizations Informations';
+COMMENT ON COLUMN dim_organization.id_organization IS 'Pk from the Organizations';
+COMMENT ON COLUMN dim_organization.id_country IS 'Pk from the countries';
+
+
+CREATE SEQUENCE DIM_AIRPORT_ID_AIRPORT_SEQ;
+
+CREATE TABLE dim_airport (
+                id_airport NUMBER NOT NULL,
+                id_country NUMBER NOT NULL,
+                nm_airport VARCHAR2(120),
+                CONSTRAINT DIM_AIRPORT_PK PRIMARY KEY (id_airport)
+);
+COMMENT ON TABLE dim_airport IS 'Save the Airport Informations';
+COMMENT ON COLUMN dim_airport.id_airport IS 'Pk from the Airports';
+COMMENT ON COLUMN dim_airport.id_country IS 'Pk from the countries';
+
+
+CREATE SEQUENCE DIM_SEA_ID_SEA_SEQ;
+
+CREATE TABLE dim_sea (
+                id_sea NUMBER NOT NULL,
+                id_country NUMBER NOT NULL,
+                nm_sea VARCHAR2(60),
+                CONSTRAINT DIM_SEA_PK PRIMARY KEY (id_sea, id_country)
+);
+COMMENT ON TABLE dim_sea IS 'Save the Sea Informations';
+COMMENT ON COLUMN dim_sea.id_sea IS 'Pk from the seas';
+COMMENT ON COLUMN dim_sea.id_country IS 'Pk from the countries';
+
+
+CREATE TABLE ft_country_metrics (
+                id_country NUMBER NOT NULL,
+                year NUMBER NOT NULL,
+                population NUMBER,
+                happiness_score NUMBER(10,4) NOT NULL,
+                economy_score NUMBER(10,4) NOT NULL,
+                freedom_score NUMBER(10,4) NOT NULL,
+                gov_corruption NUMBER(10,4) NOT NULL,
+                generosity_score NUMBER(10,4) NOT NULL,
+                health_score NUMBER(10,4) NOT NULL,
+                family_score NUMBER(10,4) NOT NULL,
+                dystopia_compare_score NUMBER(10,4) NOT NULL,
+                infant_mortality_pct NUMBER(10,4) NOT NULL,
+                unemployment_pct NUMBER(10,4) NOT NULL,
+                inflation_pct NUMBER(10,4) NOT NULL,
+                CONSTRAINT FT_COUNTRY_METRICS_PK PRIMARY KEY (id_country, year)
+);
+COMMENT ON TABLE ft_country_metrics IS 'Save socieconomic data from the countries';
+COMMENT ON COLUMN ft_country_metrics.id_country IS 'Pk from the countries';
+COMMENT ON COLUMN ft_country_metrics.economy_score IS 'The extent to which GDP contributes to the calculation of the Happiness Score';
+COMMENT ON COLUMN ft_country_metrics.freedom_score IS 'The extent to which Freedom contributed to the calculation of the Happiness Score.';
+COMMENT ON COLUMN ft_country_metrics.gov_corruption IS 'The extent to which Perception of Corruption contributes to Happiness Score.';
+COMMENT ON COLUMN ft_country_metrics.health_score IS 'The extent to which Life expectancy contributed to the calculation of the Happiness Score';
+COMMENT ON COLUMN ft_country_metrics.family_score IS 'The extent to which Family contributes to the calculation of the Happiness Score';
+COMMENT ON COLUMN ft_country_metrics.dystopia_compare_score IS 'The extent to which Dystopia Residual contributed to the calculation of the Happiness Score. Which higher the score, better it is.';
+
+
+CREATE TABLE ft_weather_metrics (
+                id_country NUMBER NOT NULL,
+                year NUMBER NOT NULL,
+                avg_air_quality NUMBER(10,4) NOT NULL,
+                avg_precipitation NUMBER,
+                CONSTRAINT FT_WEATHER_PK PRIMARY KEY (id_country, year)
+);
+COMMENT ON TABLE ft_weather_metrics IS 'Save historical whether mesaurements Informations from the countries (air_quality and precipition)';
+COMMENT ON COLUMN ft_weather_metrics.id_country IS 'Pk from the countries';
+COMMENT ON COLUMN ft_weather_metrics.avg_air_quality IS 'Air pollution, mean annual exposure (micrograms per cubic meter)';
+COMMENT ON COLUMN ft_weather_metrics.avg_precipitation IS 'Average precipitation in depth (mm per year)';
+
+
+ALTER TABLE ft_weather_metrics ADD CONSTRAINT FK_COUNTRY_WEATHER
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE ft_country_metrics ADD CONSTRAINT FK_COUNTRY_METRICS
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE dim_sea ADD CONSTRAINT FK_COUNTRY_SEA
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE dim_airport ADD CONSTRAINT FK_COUNTRY_AIRPORT
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE dim_organization ADD CONSTRAINT FK_COUNTRY_ORG
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE dim_religion ADD CONSTRAINT DIM_COUNTRY_DIM_RELIGION_FK
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+ALTER TABLE dim_language ADD CONSTRAINT DIM_COUNTRY_DIM_LANGUAGE_FK
+FOREIGN KEY (id_country)
+REFERENCES dim_country (id_country)
+NOT DEFERRABLE;
+
+
+
+
+-- ================================================================
+-- Staged to Schema
+
+INSERT INTO dim_country (id_country, nm_country, region)
+SELECT 
+    DIM_COUNTRY_ID_COUNTRY_SEQ.NEXTVAL, 
+    data.nm_country, 
+    data.region
+FROM ( 
+    -- Subquery to extract country names and regions
+    SELECT DISTINCT 
+        xt.nm_country, 
+        COALESCE(sh.region, 'N/A') as region
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/country'
+            PASSING s.DADOS_XML
+            COLUMNS
+                nm_country VARCHAR2(120) PATH 'name[1]' -- Takes the first name
+        ) xt
+    LEFT JOIN STG_HAPPINESS sh 
+        ON UPPER(TRIM(sh.COUNTRY_NAME)) = UPPER(TRIM(xt.nm_country))
+    WHERE xt.nm_country IS NOT NULL
+) data
+;
+
+
+INSERT INTO dim_religion (id_country, nm_religion)
+SELECT DISTINCT 
+    dc.id_country,
+    COALESCE(xt.nm_religion, 'N/A') as nm_religion
+FROM 
+    STG_MONDIAL_XML s,
+    XMLTABLE('/mondial/country' 
+        PASSING s.DADOS_XML
+        COLUMNS
+            nm_country VARCHAR2(120) PATH 'name[1]', 
+            nm_religion  VARCHAR2(120) PATH 'religion[1]'  -- Takes the religion most followed       
+    ) xt
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(xt.nm_country))
+WHERE xt.nm_religion IS NOT NULL
+;
+
+
+INSERT INTO dim_language (id_country, nm_language)
+SELECT DISTINCT 
+    dc.id_country,
+    COALESCE(xt.nm_language, 'N/A') as nm_language
+FROM 
+    STG_MONDIAL_XML s,
+    XMLTABLE('/mondial/country' 
+        PASSING s.DADOS_XML
+        COLUMNS
+            nm_country VARCHAR2(120) PATH 'name[1]', 
+            nm_language  VARCHAR2(120) PATH 'language[1]' -- Takes the language most spoken      
+    ) xt
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(xt.nm_country))
+WHERE xt.nm_language IS NOT NULL 
+;
+
+
+INSERT INTO dim_organization (id_organization, id_country, nm_organization)
+SELECT 
+    DIM_ORGANIZATION_ID_ORGANIZ722.NEXTVAL,
+    dc.id_country,
+    org.nm_organization
+FROM (
+    -- Subquery 1: Extract the Organization and combine all member country codes into a single space-separated string
+    SELECT 
+        xt_org.nm_organization,
+        xt_org.countries
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/organization' 
+            PASSING s.DADOS_XML
+            COLUMNS
+                nm_organization VARCHAR2(120)  PATH 'name[1]',
+                -- string-join aggregates codes from multiple <members> tags, separating them with a space
+                countries       VARCHAR2(4000) PATH 'string-join(members/@country, " ")'
+        ) xt_org
+) org
+JOIN (
+    -- Subquery 2: Extract countries and their corresponding codes from the XML structure
+    SELECT 
+        xt_cnt.car_code,
+        xt_cnt.nm_country
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/country'
+            PASSING s.DADOS_XML
+            COLUMNS
+                car_code   VARCHAR2(10)  PATH '@car_code',
+                nm_country VARCHAR2(120) PATH 'name[1]'
+        ) xt_cnt
+) cxml 
+    -- Match records by checking if the country code is contained within the large member list string
+    ON INSTR(' ' || UPPER(TRIM(org.countries)) || ' ', ' ' || UPPER(TRIM(cxml.car_code)) || ' ') > 0
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(cxml.nm_country));
+
+
+INSERT INTO dim_sea (id_sea, id_country, nm_sea)
+SELECT 
+    DIM_SEA_ID_SEA_SEQ.NEXTVAL,
+    dc.id_country,
+    mar.nm_sea
+FROM (
+    -- Subquery 1: extracts all seas and their respective country codes
+    SELECT 
+        xt_sea.nm_sea,
+        xt_sea.countries
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/sea' 
+            PASSING s.DADOS_XML
+            COLUMNS
+                nm_sea    VARCHAR2(60)  PATH 'name[1]',
+                countries VARCHAR2(200) PATH '@country'
+        ) xt_sea
+) mar
+JOIN (
+     -- Subquery 2: extracts all countries and their respective country codes
+    SELECT 
+        xt_cnt.car_code,
+        xt_cnt.nm_country
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/country'
+            PASSING s.DADOS_XML
+            COLUMNS
+                car_code   VARCHAR2(10)  PATH '@car_code',
+                nm_country VARCHAR2(120) PATH 'name[1]'
+        ) xt_cnt
+) cxml 
+    -- Checks if the country code is in the list of countries that border the sea
+    ON INSTR(' ' || UPPER(TRIM(mar.countries)) || ' ', ' ' || UPPER(TRIM(cxml.car_code)) || ' ') > 0
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(cxml.nm_country))
+;
+
+
+INSERT INTO dim_airport (id_airport, id_country, nm_airport)
+SELECT 
+    DIM_AIRPORT_ID_AIRPORT_SEQ.NEXTVAL,
+    dc.id_country,
+    COALESCE(air.nm_airport, 'N/A') as nm_airport
+FROM (
+    -- Subquery 1: extracts all airports and their respective country codes
+    SELECT 
+        xt_air.country_code,
+        xt_air.nm_airport
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/airport' 
+            PASSING s.DADOS_XML
+            COLUMNS
+                country_code VARCHAR2(10)  PATH '@country', -- Takes the attribute country="AFG"
+                nm_airport   VARCHAR2(120) PATH 'name[1]'   -- Takes the airport name 
+        ) xt_air
+) air
+JOIN (
+    -- Subquery 2: extracts all countries and their respective country codes
+    SELECT 
+        xt_cnt.car_code,
+        xt_cnt.nm_country
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/country'
+            PASSING s.DADOS_XML
+            COLUMNS
+                car_code   VARCHAR2(10)  PATH '@car_code', -- Takes car_code="GR", e.g
+                nm_country VARCHAR2(120) PATH 'name[1]'
+        ) xt_cnt
+) cxml ON UPPER(TRIM(air.country_code)) = UPPER(TRIM(cxml.car_code))
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(cxml.nm_country))
+WHERE air.nm_airport IS NOT NULL
+;
+
+
+
+INSERT INTO ft_weather_metrics (id_country, year, avg_air_quality, avg_precipitation)
+SELECT 
+    dc.id_country,
+    combined.clean_year AS year,
+    MAX(combined.air_val) AS avg_air_quality,
+    MAX(combined.rain_val) AS avg_precipitation
+FROM (
+    SELECT 
+        jt.country_name,
+        TO_NUMBER(jt.year) AS clean_year,
+
+       -- Converting to number and replacing '.' with ','    
+        CASE WHEN UPPER(TRIM(jt.indicator_id)) = 'EN.ATM.PM25.MC.M3' THEN TO_NUMBER(REPLACE(jt.metric_value, '.', ',')) END AS air_val,
+        CASE WHEN UPPER(TRIM(jt.indicator_id)) = 'AG.LND.PRCP.MM'   THEN TO_NUMBER(REPLACE(jt.metric_value, '.', ',')) END AS rain_val
+    FROM 
+        -- Extracting data from JSON
+        STG_WORLD_BANK s,
+        JSON_TABLE(s.DADOS_JSON, '$[*]' -- Go through all elements of the JSON array and transform each one in a line into a virtual table 
+            COLUMNS (
+                indicator_id VARCHAR2(50)  PATH '$.indicator.id',
+                country_name VARCHAR2(120) PATH '$.country.value',
+                year         VARCHAR2(4)   PATH '$.date',
+                metric_value VARCHAR2(50)  PATH '$.value'
+            )
+        ) jt
+    WHERE UPPER(TRIM(jt.indicator_id)) IN ('EN.ATM.PM25.MC.M3', 'AG.LND.PRCP.MM')
+      AND jt.metric_value IS NOT NULL
+) combined
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(combined.country_name))
+GROUP BY 
+    dc.id_country, 
+    combined.clean_year
+;
+
+
+INSERT INTO ft_country_metrics (
+    id_country, 
+    year, 
+    population, 
+    happiness_score, 
+    economy_score, 
+    freedom_score, 
+    gov_corruption, 
+    generosity_score, 
+    health_score, 
+    family_score, 
+    dystopia_compare_score, 
+    infant_mortality_pct, 
+    unemployment_pct, 
+    inflation_pct
+)
+SELECT 
+    dc.id_country,
+    2015 AS year,
+    TO_NUMBER(xml_data.population),
+
+    sh.happiness_score,           
+    sh.gdp_per_capita,    
+    sh.freedom,                   
+    sh.corruption_percept,     
+    sh.generosity,                
+    sh.life_expectancy,    
+    sh.social_support,                   
+    sh.dystopia_residual,         
+
+    -- Converting to number and replacing '.' with ','
+    TO_NUMBER(REPLACE(xml_data.infant_mortality, '.', ',')),
+    TO_NUMBER(REPLACE(xml_data.unemployment, '.', ',')),
+    TO_NUMBER(REPLACE(xml_data.inflation, '.', ','))
+FROM 
+    STG_HAPPINESS sh
+JOIN dim_country dc 
+    ON UPPER(TRIM(dc.nm_country)) = UPPER(TRIM(sh.country_name))
+LEFT JOIN (
+    SELECT 
+        xt.nm_country,
+        xt.population,
+        xt.infant_mortality,
+        xt.unemployment,
+        xt.inflation
+    FROM 
+        STG_MONDIAL_XML s,
+        XMLTABLE('/mondial/country'
+            PASSING s.DADOS_XML
+            COLUMNS
+                nm_country       VARCHAR2(120) PATH 'name[1]',
+                population       VARCHAR2(50)  PATH 'population[last()]',
+                infant_mortality VARCHAR2(50)  PATH 'infant_mortality',
+                unemployment     VARCHAR2(50)  PATH 'unemployment',
+                inflation        VARCHAR2(50)  PATH 'inflation'
+        ) xt
+) xml_data ON UPPER(TRIM(xml_data.nm_country)) = UPPER(TRIM(sh.country_name))
+;
+
+-- =========================================================================
+-- Queries
+
+
+-------------- BASIC QUERYS -------------
+
+
+-- Average happiness_score by region
+SELECT
+    c.REGION AS region,
+    ROUND(AVG(f.HAPPINESS_SCORE), 3) AS avg_happiness,
+    COUNT(*) AS country_count
+FROM FT_COUNTRY_METRICS f
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+WHERE f.HAPPINESS_SCORE IS NOT NULL
+GROUP BY c.REGION
+ORDER BY avg_happiness DESC;
+
+
+-- Average unemployment and inflation by region
+SELECT
+    c.REGION AS region,
+    ROUND(AVG(COALESCE(f.UNEMPLOYMENT_PCT, 0)), 2) AS avg_unemployment,
+    ROUND(AVG(COALESCE(f.INFLATION_PCT, 0)), 2) AS avg_inflation,
+    COUNT(*) AS country_count,
+    -- Count how many countries had null data before COALESCE
+    SUM(CASE WHEN f.UNEMPLOYMENT_PCT IS NULL THEN 1 ELSE 0 END) AS null_unemployment_count,
+    SUM(CASE WHEN f.INFLATION_PCT IS NULL THEN 1 ELSE 0 END) AS null_inflation_count
+FROM FT_COUNTRY_METRICS f
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+GROUP BY c.REGION
+ORDER BY avg_unemployment DESC;
+
+
+-- Religion domimant more common by region
+SELECT 
+    c.region AS region,
+    r.NM_RELIGION AS dominant_religion,
+    COUNT(r.NM_RELIGION) AS religion_count,
+    DENSE_RANK() OVER (PARTITION BY c.region ORDER BY COUNT(r.NM_RELIGION) DESC) AS ranking
+FROM 
+    DIM_RELIGION r
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = r.ID_COUNTRY
+GROUP BY c.region, r.NM_RELIGION
+ORDER BY c.region, r.NM_RELIGION;
+
+-- Investigating countries with "N/A"
+SELECT 
+    c.NM_COUNTRY AS country_name,
+    c.REGION AS region_status,
+    r.NM_RELIGION AS religion
+FROM 
+    DIM_COUNTRY c
+JOIN 
+    DIM_RELIGION r ON c.ID_COUNTRY = r.ID_COUNTRY
+WHERE 
+    c.REGION = 'N/A' OR c.REGION IS NULL
+ORDER BY 
+    r.NM_RELIGION, c.NM_COUNTRY;
+
+
+----------------- QUERYS WITH CASE and COALESCE ----------------
+
+-- Classification of contries by hapiness score
+SELECT 
+    c.NM_COUNTRY AS country,
+    CASE WHEN f.happiness_score > 7 THEN 'Happy'
+         WHEN f.happiness_score > 5 THEN 'Medium'
+         ELSE 'Unhappy' END AS happiness_level,
+    f.happiness_score as happiness_score
+FROM FT_COUNTRY_METRICS f
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+;
+
+
+-- Replacement and counting of nulls of inflation and unemployment by average of the region (+window function)
+WITH region_avg AS (
+    SELECT
+        c.NM_COUNTRY AS country,
+        c.REGION AS region,    
+        f.inflation_pct AS raw_inflation_pct,
+        f.unemployment_pct AS raw_unemployment_pct,
+        AVG(f.inflation_pct) OVER(PARTITION BY c.region) AS avg_region_inflation,
+        AVG(f.unemployment_pct) OVER(PARTITION BY c.region) AS avg_region_unemployment
+    FROM 
+        FT_COUNTRY_METRICS f
+    JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+)
+SELECT 
+    ra.country,
+    ra.region,
+    ROUND(COALESCE(ra.raw_inflation_pct, ra.avg_region_inflation), 3) AS inflation_pct,
+    ROUND(COALESCE(ra.raw_unemployment_pct, ra.avg_region_unemployment), 3) AS unemployment_pct,
+    CASE WHEN ra.raw_inflation_pct IS NULL THEN 1 ELSE 0 END AS inflation_was_null,
+    CASE WHEN ra.raw_unemployment_pct IS NULL THEN 1 ELSE 0 END AS unemployment_was_null
+FROM 
+    region_avg ra
+;
+
+------------------ QUERYS WITH ROLLUP AND CUBE -------------
+
+-- ROLLUP of mean of precipitation and air_quality by country -> region 
+SELECT 
+    c.NM_COUNTRY AS country,
+    c.REGION AS region,
+    ROUND(AVG(fwm.AVG_AIR_QUALITY), 2) AS avg_air_quality,
+    ROUND(AVG(fwm.AVG_PRECIPITATION), 2) AS avg_precipitation
+FROM 
+    ft_weather_metrics fwm
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = fwm.ID_COUNTRY
+GROUP BY ROLLUP(c.NM_COUNTRY, c.REGION);
+
+
+-- CUBE mean of precipitation and air_quality by country <-> region
+SELECT 
+    c.NM_COUNTRY AS country,
+    c.REGION AS region,
+    ROUND(AVG(fwm.AVG_AIR_QUALITY), 2) AS avg_air_quality,
+    ROUND(AVG(fwm.AVG_PRECIPITATION), 2) AS avg_precipitation
+FROM 
+    ft_weather_metrics fwm
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = fwm.ID_COUNTRY
+GROUP BY CUBE(c.NM_COUNTRY, c.REGION)
+;
+
+
+-------------- QUERYS WITH WINDOW FUNCTIONS -------------
+
+-- RANK by hapiness inside each region
+SELECT
+    c.REGION AS region,
+    c.NM_COUNTRY AS country,
+    f.HAPPINESS_SCORE AS happiness_score,
+    rank() OVER (PARTITION BY c.REGION ORDER BY f.HAPPINESS_SCORE DESC) AS regional_rank,
+    rank() OVER (ORDER BY f.HAPPINESS_SCORE DESC) AS global_rank
+FROM 
+    FT_COUNTRY_METRICS f 
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+ORDER by c.region, f.happiness_score DESC
+;
+
+
+-- Porcentage of happiness_score of each country in relation to the average of the region (see how many % above/below the average)
+SELECT 
+    c.NM_COUNTRY AS country,
+    c.REGION AS region,
+    f.happiness_score,
+    ROUND((f.happiness_score / AVG(f.happiness_score) OVER (PARTITION BY c.REGION)) * 100, 2) AS percent_of_regional_avg
+FROM 
+    FT_COUNTRY_METRICS f
+JOIN DIM_COUNTRY c ON c.ID_COUNTRY = f.ID_COUNTRY
+;
+
+-- Cumulative count of airports by region and by country
+SELECT DISTINCT
+    c.nm_country,
+    c.REGION AS region,
+    count(a.id_airport) OVER (PARTITION BY c.nm_country ORDER BY c.nm_country) AS airports_country_count,
+    count(a.id_airport) OVER (PARTITION BY c.REGION ORDER BY c.region) AS airports_region_count
+FROM 
+    DIM_AIRPORT a
+LEFT JOIN DIM_COUNTRY c ON c.ID_COUNTRY = a.ID_COUNTRY
+;
+
+
+-------------- QUERYS WITH VIEW -------------
+
+-- VIEW: Consolidated view of country + all metrics
+CREATE VIEW vw_country_metrics(
+    country_name,
+    year, 
+    population, 
+    happiness_score, 
+    economy_score, 
+    freedom_score, 
+    gov_corruption, 
+    generosity_score, 
+    health_score, 
+    family_score, 
+    dystopia_compare_score, 
+    infant_mortality_pct, 
+    unemployment_pct, 
+    inflation_pct
+) AS 
+SELECT 
+    dc.nm_country,
+    cm.year,
+    cm.population,
+    cm.happiness_score,           
+    cm.economy_score,    
+    cm.freedom_score,                   
+    cm.gov_corruption,     
+    cm.generosity_score,                
+    cm.health_score,    
+    cm.family_score,                   
+    cm.dystopia_compare_score,   
+    cm.infant_mortality_pct,
+    cm.unemployment_pct,
+    cm.inflation_pct
+FROM 
+    ft_country_metrics cm
+LEFT JOIN dim_country dc ON cm.id_country = dc.id_country
+;
+
+-- Testing the view
+SELECT * 
+FROM VW_COUNTRY_METRICS
+
+-- MATERIALIZED VIEW: mean of indicators by region
+-- Used for accelerating OLAP queries of drill-down
+CREATE MATERIALIZED VIEW mv_region_metrics 
+    BUILD IMMEDIATE 
+    REFRESH COMPLETE ON DEMAND
+    ENABLE QUERY REWRITE
+    AS SELECT
+        dc.region,
+        ROUND(AVG(cm.population), 0) AS avg_population,
+        ROUND(AVG(cm.happiness_score), 2) AS avg_happiness,
+        ROUND(AVG(cm.economy_score), 2) AS avg_gdp,
+        ROUND(AVG(cm.freedom_score), 2) AS avg_freedom,        
+        ROUND(AVG(cm.gov_corruption), 2) AS avg_corruption_percept,     
+        ROUND(AVG(cm.generosity_score), 4) AS avg_generosity,        
+        ROUND(AVG(cm.health_score), 2) AS avg_life_expectancy, 
+        ROUND(AVG(cm.family_score), 2) AS avg_family_score,             
+        ROUND(AVG(cm.dystopia_compare_score), 2) AS avg_dystopia_score
+    FROM 
+        ft_country_metrics cm
+    LEFT JOIN dim_country dc ON cm.id_country = dc.id_country
+    GROUP BY dc.region
+    ;
+
+SELECT * 
+FROM mv_region_metrics;
+
+----------------------  XML QUERIES ---------------------
+
+-- List UN member countries (org-UN)
+SELECT x.country_name, x.memberships
+FROM STG_MONDIAL_XML m,
+     XMLTABLE(
+         '$c//country[contains(string(@memberships), "org-UN")]'
+         PASSING m.dados_xml AS "c"
+         COLUMNS 
+             country_name VARCHAR2(100) PATH 'name[1]',
+             memberships  VARCHAR2(500) PATH 'string(@memberships)'
+     ) x;
+
+
+
+-- Ranking by number of organizations in a country
+WITH RankedOrganizationCountries AS (
+    SELECT x.country_name,
+           REGEXP_COUNT(x.memberships, '[^ ]+') AS num_organizations,
+           RANK() OVER (ORDER BY REGEXP_COUNT(x.memberships, '[^ ]+') DESC) AS ranking -- counts a sequence without spaces between
+    FROM STG_MONDIAL_XML m,
+         XMLTABLE(
+             '$doc//country[contains(@memberships, "org-UN")]'
+             PASSING m.dados_xml AS "doc"
+             COLUMNS 
+                 country_name VARCHAR2(100)  PATH 'name[1]',
+                 memberships  VARCHAR2(4000) PATH '@memberships'
+         ) x
+)
+SELECT * 
+FROM RankedOrganizationCountries
+WHERE country_name = 'Brazil'
+;
+
+-- Return name and government of countries with unemployment > 20%
+SELECT x.country_name, 
+       x.government, 
+       x.unemployment
+FROM STG_MONDIAL_XML m,
+     XMLTABLE(
+         '$doc//country'
+         PASSING m.dados_xml AS "doc"
+         COLUMNS 
+             country_name VARCHAR2(100) PATH 'name[1]',
+             government   VARCHAR2(100) PATH 'government[1]',
+             unemployment VARCHAR2(50)  PATH 'unemployment[1]' -- VARCHAR FOR NULL HANDLING (if was number, would occur error)
+     ) x
+WHERE TO_NUMBER( -- Attempts to convert to null
+        x.unemployment DEFAULT NULL ON CONVERSION ERROR, -- HANDLING DIRT AND NULLS! -> CONVERTS TO NULL
+        '999.999', 
+        'NLS_NUMERIC_CHARACTERS=''.,''' -- AMERICAN STYLE OF DECIMAL
+      ) > 20
+ORDER BY TO_NUMBER(
+        x.unemployment DEFAULT NULL ON CONVERSION ERROR, 
+        '999.999',
+        'NLS_NUMERIC_CHARACTERS=''.,'''
+      ) DESC;
+
+
+-- XMLSerialize: export query result as formatted XML (the first 5 of the XML)
+SELECT XMLSERIALIZE(
+           CONTENT XMLQUERY(
+               '<world_data>
+                {
+                  for $c in $doc//country[position() <= 5]
+                  return 
+                    <country>
+                      <name>{$c/name/text()}</name>
+                      <government>{$c/government/text()}</government>
+                    </country>
+                }
+                </world_data>'
+               PASSING m.dados_xml AS "doc"
+               RETURNING CONTENT
+           ) AS CLOB INDENT SIZE = 2 -- Using CLOB for large XML, just like in python (load_xml.py)
+       ) AS formatted_xml
+FROM STG_MONDIAL_XML m;
+
+
+----------------------  JSON QUERIES ---------------------
+
+-- List countries with air_quality > 100
+SELECT 
+    jt.country_name,
+    ROUND(TO_NUMBER(jt.air_quality DEFAULT NULL ON CONVERSION ERROR, '999999999.999999999999999', 'NLS_NUMERIC_CHARACTERS=''.,'''), 2) AS air_quality_round,
+    jt.year
+FROM 
+  STG_WORLD_BANK swb,
+  JSON_TABLE(
+      swb.DADOS_JSON,
+      '$[*]' -- Go through all elements of the JSON array and transform each one in a line into a virtual table 
+      COLUMNS(
+        country_name VARCHAR2(120) PATH '$.country.value',
+        air_quality VARCHAR2(50)  PATH '$.value',
+        year         VARCHAR2(4)   PATH '$.date'
+      ) 
+  ) jt
+WHERE swb.FONTE like '%worldbankAirQualityCountries.json%'
+  AND
+  ROUND(TO_NUMBER(jt.air_quality DEFAULT NULL ON CONVERSION ERROR, '999999999.999999999999999', 'NLS_NUMERIC_CHARACTERS=''.,'''), 2) > 100
+  AND jt.year = '2015';
+
+
+-- Do the average of precipition by country between 2005 and 2015
+SELECT
+    jt.country_name,
+    -- dont have any number decimal in precipition(mm) value in json
+    ROUND(AVG(TO_NUMBER(jt.precipitation DEFAULT NULL ON CONVERSION ERROR, '99999', 'NLS_NUMERIC_CHARACTERS=''.,''')), 2) AS air_precipitation_round 
+FROM 
+   STG_WORLD_BANK swb,
+   JSON_TABLE(
+        swb.DADOS_JSON,
+        '$[*]'
+    COLUMNS(
+       country_name VARCHAR2(120) PATH '$.country.value',
+       year         VARCHAR2(4)   PATH '$.date',
+       precipitation VARCHAR2(50)  PATH '$.value'
+    )
+) jt
+WHERE swb.FONTE like '%worldbankPrecipitationCountries.json%'
+    and
+    TO_NUMBER(jt.year DEFAULT NULL ON CONVERSION ERROR, '9999', 'NLS_NUMERIC_CHARACTERS=''.,''') BETWEEN 2005 AND 2015
+GROUP BY
+    jt.country_name
+;

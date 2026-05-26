@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxograma DTD Mondial</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral', maxTextSize: 90000 });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            overflow-x: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative; /* Necessário para o tooltip não se perder */
+        }
+        
+        /* Estilização da nossa caixinha customizada */
+        #custom-tooltip {
+            position: absolute;
+            background-color: rgba(30, 30, 30, 0.95);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            pointer-events: none; /* Garante que o tooltip não bloqueie o próprio mouse */
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            z-index: 1000;
+            max-width: 280px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Estrutura Hierárquica do XML Mondial</h1>
+    <p style="text-align: center;">Passe o mouse sobre as <strong>caixas azuis e vermelhas</strong> para ler o que cada entidade armazena.</p>
+
+    <div id="custom-tooltip"></div>
+
+    <div class="container">
+        <div class="mermaid">
+            graph LR
+                %% Estilos das caixas
+                classDef root fill:#ff9999,stroke:#333,stroke-width:2px;
+                classDef entity fill:#99ccff,stroke:#333,stroke-width:2px;
+                classDef attr fill:#e6e6e6,stroke:#666,stroke-width:1px,stroke-dasharray: 5 5;
+
+                %% Elemento Raiz
+                M(("mondial")):::root
+
+                %% Entidades Principais
+                M --> C["country*"]:::entity
+                M --> CO["continent*"]:::entity
+                M --> OR["organization*"]:::entity
+                M --> SE["sea*"]:::entity
+                M --> RI["river*"]:::entity
+                M --> LA["lake*"]:::entity
+                M --> IS["island*"]:::entity
+                M --> MO["mountain*"]:::entity
+                M --> DE["desert*"]:::entity
+                M --> AI["airport*"]:::entity
+                M --> LT["langtree*"]:::entity
+
+                %% Estrutura de Country
+                C --> C1("name+"):::attr
+                C --> C2("localname?"):::attr
+                C --> C3("population+"):::attr
+                C --> C4("population_growth?"):::attr
+                C --> C5("infant_mortality?"):::attr
+                C --> C6("gdp_total / agri / ind / serv?"):::attr
+                C --> C7("inflation? / unemployment?"):::attr
+                C --> C8("indep_date | dependent?"):::attr
+                C --> C9("government? / encompassed+"):::attr
+                C --> C10("ethnicgroup* / religion* / language*"):::attr
+                C --> C11("border*"):::attr
+                
+                %% Relacionamento Country -> Province e City
+                C --> PR["province+"]:::entity
+                C --> CI["city+"]:::entity
+
+                %% Estrutura de Province
+                PR --> P1("name+"):::attr
+                PR --> P2("localname?"):::attr
+                PR --> P3("area?"):::attr
+                PR --> P4("population*"):::attr
+                PR --> CI_P["city*"]:::entity
+
+                %% Estrutura de City
+                CI_P --> CI1("name+"):::attr
+                CI_P --> CI2("localname?"):::attr
+                CI_P --> CI3("latitude? / longitude? / elevation?"):::attr
+                CI_P --> CI4("population*"):::attr
+                CI_P --> CI5("located_at* / located_on*"):::attr
+
+                CI --> CI1
+                CI --> CI2
+                CI --> CI3
+                CI --> CI4
+                CI --> CI5
+
+                %% Estrutura de Continent
+                CO --> CO1("name"):::attr
+                CO --> CO2("area"):::attr
+
+                %% Estrutura de Organization
+                OR --> OR1("name"):::attr
+                OR --> OR2("abbrev"):::attr
+                OR --> OR3("established?"):::attr
+                OR --> OR4("members*"):::attr
+
+                %% Estrutura de River
+                RI --> RI1("name+"):::attr
+                RI --> RI2("located* / through*"):::attr
+                RI --> RI3("to?"):::attr
+                RI --> RI4("area? / length?"):::attr
+                RI --> SRC["source?"]:::entity
+                RI --> EST["estuary?"]:::entity
+
+                SRC --> SRC1("mountains? / located* / from?"):::attr
+                SRC --> SRC2("latitude? / longitude? / elevation?"):::attr
+                EST --> EST1("located*"):::attr
+                EST --> EST2("latitude? / longitude? / elevation?"):::attr
+
+                %% Estrutura de Lake
+                LA --> LA1("name+"):::attr
+                LA --> LA2("located* / to?"):::attr
+                LA --> LA3("area? / depth? / height?"):::attr
+                LA --> LA4("latitude? / longitude? / elevation?"):::attr
+
+                %% Estrutura de Sea
+                SE --> SE1("name+"):::attr
+                SE --> SE2("located*"):::attr
+                SE --> SE3("area? / depth?"):::attr
+
+                %% Estrutura de Island
+                IS --> IS1("name+ / islands?"):::attr
+                IS --> IS2("located*"):::attr
+                IS --> IS3("area?"):::attr
+                IS --> IS4("latitude? / longitude? / elevation?"):::attr
+
+                %% Estrutura de Mountain e Desert
+                MO --> MO1("name+ / mountains?"):::attr
+                MO --> MO2("located*"):::attr
+                MO --> MO3("latitude? / longitude? / elevation?"):::attr
+
+                DE --> DE1("name+"):::attr
+                DE --> DE2("located*"):::attr
+                DE --> DE3("area? / latitude? / longitude?"):::attr
+
+                %% Estrutura de Airport
+                AI --> AI1("name+"):::attr
+                AI --> AI2("latitude / longitude / elevation?"):::attr
+                AI --> AI3("gmtOffset"):::attr
+                AI --> AI4("located_on?"):::attr
+
+                %% Estrutura de Langtree
+                LT --> LT1("name+"):::attr
+                LT --> LT2("spokenby*"):::attr
+                LT --> LT_REC["langtree* (Recursivo)"]:::entity
+        </div>
+    </div>
+
+    <script>
+        // Nosso "banco de dados" de explicações
+        const explicacoes = {
+            "mondial": "Elemento raiz que engloba toda a base de dados.",
+            "country*": "Informações dos países (população, economia, fronteiras, dados políticos).",
+            "continent*": "Continentes do mundo e suas respectivas áreas globais.",
+            "organization*": "Organizações globais (ex: ONU, OTAN), com data de criação e países membros.",
+            "sea*": "Mares, suas localizações nos países e profundidades.",
+            "river*": "Rios, tamanho, onde estão localizados e seu trajeto (nascente e foz).",
+            "lake*": "Lagos e suas informações geográficas (profundidade, elevação, etc).",
+            "island*": "Ilhas, suas coordenadas geográficas e tamanho.",
+            "mountain*": "Montanhas e vulcões, incluindo coordenadas e elevações.",
+            "desert*": "Desertos, onde estão localizados e suas áreas.",
+            "airport*": "Aeroportos, código IATA, coordenadas exatas e fuso horário.",
+            "langtree*": "Árvore genealógica das famílias de idiomas no mundo.",
+            "province+": "Províncias ou Estados que pertencem a um país.",
+            "city+": "Cidades e seus dados específicos (como população e coordenadas).",
+            "city*": "Cidades que pertencem à jurisdição de uma província específica.",
+            "source?": "Nascente de um rio (onde ele se origina).",
+            "estuary?": "Foz de um rio (onde ele deságua no mar, em um lago ou outro rio).",
+            "langtree* (Recursivo)": "Estrutura recursiva para organizar línguas derivadas."
+        };
+
+        // Roda essa função 1.5 segundos após a página abrir para dar tempo do Mermaid desenhar os nós
+        setTimeout(() => {
+            const tooltip = document.getElementById('custom-tooltip');
+            const nodes = document.querySelectorAll('.node');
+
+            nodes.forEach(node => {
+                // Acha o texto dentro do desenho do Mermaid
+                const textElement = node.querySelector('.nodeLabel');
+                if (textElement) {
+                    const textoDoNo = textElement.textContent.trim();
+                    
+                    // Se o texto bater com nosso dicionário, ativa a caixinha
+                    if (explicacoes[textoDoNo]) {
+                        node.style.cursor = 'help';
+                        
+                        node.addEventListener('mouseenter', (e) => {
+                            tooltip.textContent = explicacoes[textoDoNo];
+                            tooltip.style.opacity = '1';
+                        });
+
+                        node.addEventListener('mousemove', (e) => {
+                            // Faz a caixinha seguir o mouse (com +15px para não ficar exatamente embaixo da seta)
+                            tooltip.style.left = (e.pageX + 15) + 'px';
+                            tooltip.style.top = (e.pageY + 15) + 'px';
+                        });
+
+                        node.addEventListener('mouseleave', () => {
+                            tooltip.style.opacity = '0';
+                        });
+                    }
+                }
+            });
+        }, 1500);
+    </script>
+</body>
+</html>

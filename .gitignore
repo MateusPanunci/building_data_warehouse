@@ -1,0 +1,20 @@
+# -- Folders --
+.secrets/
+__pycache__/
+pythonlibs/
+.config/
+.local/
+.cache/
+.venv/
+venv/
+data/
+env/
+
+# -- Files --
+.env
+.upm
+.replit
+replit.nix
+
+# -- File that needs to be pushed -- 
+!.env.example 
